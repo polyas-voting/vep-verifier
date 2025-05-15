@@ -3,6 +3,10 @@ package de.polyas.core3.vep.verif
 import de.polyas.core3.vep.verif.input.Input
 import de.polyas.core3.vep.verif.reporting.showBallots
 import de.polyas.core3.vep.verif.reporting.showRegistry
+import de.polyas.core3.vep.verif.verification.BallotIncorrectVerif
+import de.polyas.core3.vep.verif.verification.ElectionKeyVerif
+import de.polyas.core3.vep.verif.verification.MixInputPacketsVerif
+import de.polyas.core3.vep.verif.verification.RegistryVerif
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -47,13 +51,13 @@ class Verifier(baseFolderName: String) {
             //     ReceiptVerif.verify(input.registry, input::ballotBox, input::receipts)
             // }
 
-            // verifying("the registry") {
-            //     RegistryVerif.verify(input.registry)
-            // }
+            verifying("the registry") {
+                RegistryVerif.verify(input.registry)
+            }
 
-            // verifying("the public election key") {
-            //     ElectionKeyVerif.verify(input.electionKey)
-            // }
+             verifying("the public election key") {
+                 ElectionKeyVerif.verify(input.electionKey)
+             }
 
             // verifying("board ballot flagged") {
             //     BallotFlaggedVerif.verify(
@@ -65,13 +69,13 @@ class Verifier(baseFolderName: String) {
             //     )
             // }
 
-            // verifying("ballot-incorrect") {
-            //     BallotIncorrectVerif.verify(input::ballotFlagged, input::ballotFilteredOut)
-            // }
+             verifying("ballot-incorrect") {
+                 BallotIncorrectVerif.verify(input::ballotFlagged, input::ballotFilteredOut)
+             }
 
-            // verifying("mix packets") {
-            //     MixInputPacketsVerif.verify(input.registry, input::ballotFlagged, input::inputMixPackets)
-            // }
+             verifying("mix packets") {
+                 MixInputPacketsVerif.verify(input.registry, input::ballotFlagged, input::inputMixPackets)
+             }
 
             // verifying("output mix packets") {
             //     MixOutputPacketsVerif.verify(

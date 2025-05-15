@@ -7,6 +7,7 @@ import de.polyas.core3.crypto.elgamal.instance.ECElement
 import de.polyas.core3.crypto.elgamal.instance.EllipticCurveInst
 import de.polyas.core3.vep.verif.ballot.BallotDecoder
 import de.polyas.core3.vep.verif.types.*
+import de.polyas.core3.vep.verif.verification.BallotFlaggedVerif.ctSize
 import java.lang.String.join
 import java.util.*
 
@@ -33,7 +34,10 @@ object BallotFlaggedVerif {
 
         val revocationTokenSequence = revocationTokens()
         val revokedVoters: Set<String> =
-            revocationTokenSequence?.flatMap(RevocationToken::voterIds)?.toSet() ?: emptySet()
+            revocationTokenSequence
+                ?.flatMap(RevocationToken::voterIds)
+                ?.toSet()
+                ?: emptySet()
 
         reportRevokedVoters(revocationTokenSequence, revokedVoters)
 
@@ -48,78 +52,54 @@ object BallotFlaggedVerif {
             ballotBox().flatMap { it.ballots },
             ballotFlagged().flatMap { it.values }
         ) { ballotEntry, flagged ->
-            val ballot = ballotEntry.ballot
-            val voterId = ballot.reference
-            val status = flagged.status
+            checkCorrespondingEntries(ballotEntry, flagged, votersById, ek, registry, revokedVoters, votersWhoVoted)
+        }
+    }
 
-            // 0. check that the output entry contains the input entry
-            check(flagged.ballot == ballotEntry) {
-                "input entry for voter with reference $voterId not copied properly to the output entry"
+    private fun checkCorrespondingEntries(
+        ballotEntry: BallotEntry,
+        flagged: Annotated,
+        votersById: Map<String, Voter>,
+        ek: PublicKeyWithZKP<ECElement>,
+        registry: Registry,
+        revokedVoters: Set<String>,
+        votersWhoVoted: MutableSet<String>
+    ) {
+        val voterId = ballotEntry.ballot.reference
+        val status = flagged.status
+        val voter = votersById[voterId]
+
+        check(flagged.ballot == ballotEntry) {
+            "input entry for voter with reference $voterId not copied properly to the output entry"
+        }
+
+        if (voter == null) {
+            check(status == Annotated.Status.INCORRECT) {
+                "Ballot of voter $voterId should be marked as incorrect: invalid voter identifier"
             }
+            return
+        }
 
-            // 1. Check that the voter is registered
-            val voter = votersById[voterId] // info record for the voter, taken from the registry
-            if (voter == null) {
-                check (status == Annotated.Status.INCORRECT) {
-                    "Ballot with invalid voter reference $voterId not flagged as invalid"
+        val expectedAnnotation =
+            checkPublicLabel(ballotEntry, voter)
+                .and { checkCiphertextLength(ballotEntry, registry) }
+                .and { checkDuplicates(ballotEntry, votersWhoVoted) }
+                .and { checkZkp(ek, ballotEntry, voter, ballotVerifier) }
+                .and { checkRevocation(voter.id, revokedVoters) }
+
+        when (expectedAnnotation) {
+            is ExpectedAnnotation.OK ->
+                check(status == Annotated.Status.OK) {
+                    "A correct ballot of voter $voterId not marked as valid"
                 }
-                return@applyToCorresponding
-            }
-
-            // 2 Check ballots with mismatched public labels (different from the one in the registry)
-            if (ballot.publicLabel != voter.publicLabel) {
-                check (status == Annotated.Status.INCORRECT) {
-                    "Ballot of voter $voterId has mismatched public label, but it is not flagged as invalid"
-                }
-                return@applyToCorresponding
-            }
-
-            // 2. Compute the expected plaintext length and, doing this, check the label
-            val ballotDecoder = BallotDecoder(registry.ballotStructures)
-            val expectedPlaintextSize = ballotDecoder.encodedPlaintextSize(ballot.publicLabel) // null when the public label is incorrect
-            if (expectedPlaintextSize == null) {
-                check (status == Annotated.Status.INCORRECT) {
-                    "Ballot of voter $voterId has incorrect public label ${ballot.publicLabel}, but it is not flagged as invalid"
-                }
-                return@applyToCorresponding
-            }
-
-            // 3. Check the expected ciphertext length
-            val expectedCiphertextLength = ctSize(expectedPlaintextSize)
-            if (ballot.encryptedChoice.ciphertexts.size != expectedCiphertextLength) {
-                check (status == Annotated.Status.INCORRECT) {
-                    "Ballot of voter $voterId has wrong ciphertext length, but it is not flagged as invalid"
-                }
-                return@applyToCorresponding
-            }
-
-            // 4. Check that duplicated ballots are flagged as invalid
-            if (voterId in votersWhoVoted) {
-                check(status == Annotated.Status.INCORRECT) {"duplicated ballot of voter $voterId not marked as invalid"}
-                return@applyToCorresponding
-            }
-            votersWhoVoted += voterId
-
-            // 5. Check that invalid ballots (which do not pass the cryptographic checks) are flagged as invalid
-            val zkpResult = ballotVerifier.verifyZKP(ek.publicKey, voter.cred, ballot)
-            if (zkpResult is VerificationResult.Failed) {
+            is ExpectedAnnotation.Incorrect ->
                 check(status == Annotated.Status.INCORRECT) {
-                    "Ballot of voter $voterId has wrong zero-knowledge proof, but it is not flagged as invalid"
+                    "Ballot of voter $voterId should be marked as incorrect: ${expectedAnnotation.reason}"
                 }
-                return@applyToCorresponding
-            }
-
-            // 7. Check that revoked ballots are flagged as revoked
-            if (voterId in revokedVoters) {
-                check (status == Annotated.Status.REVOKED) {
-                    "Ballot of a revoked voter $voterId not flagged as filtered out"
+            is ExpectedAnnotation.Revoked ->
+                check(status == Annotated.Status.REVOKED) {
+                    "Ballot of voter $voterId should be marked as revoked"
                 }
-                return@applyToCorresponding
-            }
-
-            check (status == Annotated.Status.OK) {
-                "A correct ballot of voter $voterId not marked as valid"
-            }
         }
     }
 
@@ -143,8 +123,91 @@ object BallotFlaggedVerif {
     }
 
     /** Computes the ciphertext size for the given plaintext length [noBytes] */
-    private fun ctSize(noBytes: Int): Int {
+    fun ctSize(noBytes: Int): Int {
         val mpt = MultiPlaintext(ElGamalEncoding.encodeString(join("", Collections.nCopies(noBytes, "x")), group))
         return mpt.size()
     }
 }
+
+private fun checkPublicLabel(ballotEntry: BallotEntry, voter: Voter): ExpectedAnnotation {
+    val voterId = ballotEntry.ballot.reference
+
+    return if (ballotEntry.ballot.publicLabel != voter.publicLabel) {
+        ExpectedAnnotation.Incorrect("Ballot of voter $voterId has mismatched public label")
+    } else {
+        ExpectedAnnotation.OK
+    }
+}
+
+private fun checkCiphertextLength(
+    ballotEntry: BallotEntry,
+    registry: Registry,
+): ExpectedAnnotation {
+    val ballot = ballotEntry.ballot
+
+    val ballotDecoder = BallotDecoder(registry.ballotStructures)
+    val expectedPlaintextSize = ballotDecoder.encodedPlaintextSize(ballot.publicLabel)
+        ?: return ExpectedAnnotation.Incorrect( "The ballot has incorrect public label ${ballot.publicLabel}")
+
+    val expectedCiphertextLength = ctSize(expectedPlaintextSize)
+    if (ballot.encryptedChoice.ciphertexts.size != expectedCiphertextLength) {
+        return ExpectedAnnotation.Incorrect("The ballot has wrong ciphertext length")
+    }
+
+    return ExpectedAnnotation.OK
+}
+
+private fun checkDuplicates(
+    ballotEntry: BallotEntry,
+    votersWhoVoted: MutableSet<String>
+): ExpectedAnnotation {
+    val voterId = ballotEntry.ballot.reference
+    if (voterId in votersWhoVoted) {
+        return ExpectedAnnotation.Incorrect("Duplicated ballot of voter $voterId")
+    } else {
+        votersWhoVoted += voterId
+        return ExpectedAnnotation.OK
+    }
+}
+
+private fun checkZkp(
+    ek: PublicKeyWithZKP<ECElement>,
+    ballotEntry: BallotEntry,
+    voter: Voter,
+    ballotVerifier: BallotVerifier<ECElement>
+): ExpectedAnnotation {
+    val zkpResult = ballotVerifier.verifyZKP(ek.publicKey, voter.cred, ballotEntry.ballot)
+    return if (zkpResult is VerificationResult.Failed) {
+        ExpectedAnnotation.Incorrect("invalid zero-knowledge proof: ${zkpResult.errorMessage}")
+    } else {
+        ExpectedAnnotation.OK
+    }
+}
+
+private fun checkRevocation(
+    voterId: String,
+    revokedVoters: Set<String>
+): ExpectedAnnotation {
+    return if (voterId in revokedVoters) {
+        ExpectedAnnotation.Revoked
+    } else {
+        ExpectedAnnotation.OK
+    }
+}
+
+///
+
+private sealed interface ExpectedAnnotation {
+    data object OK : ExpectedAnnotation
+    data object Revoked : ExpectedAnnotation
+    data class Incorrect(val reason: String) : ExpectedAnnotation
+}
+
+private fun ExpectedAnnotation.and(other: () -> ExpectedAnnotation): ExpectedAnnotation =
+    when (this) {
+        ExpectedAnnotation.OK -> other()
+        else -> this
+    }
+
+
+

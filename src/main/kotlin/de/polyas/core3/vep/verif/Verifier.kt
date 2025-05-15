@@ -3,10 +3,7 @@ package de.polyas.core3.vep.verif
 import de.polyas.core3.vep.verif.input.Input
 import de.polyas.core3.vep.verif.reporting.showBallots
 import de.polyas.core3.vep.verif.reporting.showRegistry
-import de.polyas.core3.vep.verif.verification.BallotIncorrectVerif
-import de.polyas.core3.vep.verif.verification.ElectionKeyVerif
-import de.polyas.core3.vep.verif.verification.MixInputPacketsVerif
-import de.polyas.core3.vep.verif.verification.RegistryVerif
+import de.polyas.core3.vep.verif.verification.*
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -35,10 +32,14 @@ class Verifier(baseFolderName: String) {
 
         val time = measureTimeMillis {
 
+            /// The board integrity
+            //
             // verifying("The board hash chains") {
             //     ExportIntegrity.checkBoards(baseFolder.toPath())
             // }
 
+            /// Second device fingerprint
+            //
             // if (input.secondDeviceParametersFingerprint != null) {
             //     verifying("the second device public parameters") {
             //         SDParametersVerif.verify(input.registry, input.electionKey, input.secondDeviceParametersFingerprint)
@@ -47,9 +48,12 @@ class Verifier(baseFolderName: String) {
             //     println("*** WARN: No file with the second device public parameters given")
             // }
 
+            /// The receipts
+            //
             // verifying("the receipts") {
             //     ReceiptVerif.verify(input.registry, input::ballotBox, input::receipts)
             // }
+
 
             verifying("the registry") {
                 RegistryVerif.verify(input.registry)
@@ -59,15 +63,15 @@ class Verifier(baseFolderName: String) {
                  ElectionKeyVerif.verify(input.electionKey)
              }
 
-            // verifying("board ballot flagged") {
-            //     BallotFlaggedVerif.verify(
-            //         input.electionKey,
-            //         input.registry,
-            //         input::ballotBox,
-            //         input::ballotFlagged,
-            //         input::revocationTokens,
-            //     )
-            // }
+             verifying("board ballot flagged") {
+                 BallotFlaggedVerif.verify(
+                     input.electionKey,
+                     input.registry,
+                     input::ballotBox,
+                     input::ballotFlagged,
+                     input::revocationTokens,
+                 )
+             }
 
              verifying("ballot-incorrect") {
                  BallotIncorrectVerif.verify(input::ballotFlagged, input::ballotFilteredOut)
@@ -77,18 +81,18 @@ class Verifier(baseFolderName: String) {
                  MixInputPacketsVerif.verify(input.registry, input::ballotFlagged, input::inputMixPackets)
              }
 
-            // verifying("output mix packets") {
-            //     MixOutputPacketsVerif.verify(
-            //         input.registry,
-            //         input.electionKey,
-            //         input::inputMixPackets,
-            //         input::outputMixPackets
-            //     )
-            // }
+             verifying("output mix packets") {
+                 MixOutputPacketsVerif.verify(
+                     input.registry,
+                     input.electionKey,
+                     input::inputMixPackets,
+                     input::outputMixPackets
+                 )
+             }
 
-            // verifying("decrypted packets") {
-            //     DecryptedPacketsVerif.verify(input.electionKey, input::outputMixPackets, input::decryptedPackets)
-            // }
+             verifying("decrypted packets") {
+                 DecryptedPacketsVerif.verify(input.electionKey, input::outputMixPackets, input::decryptedPackets)
+             }
         }
 
         println("\n*************************************************************")

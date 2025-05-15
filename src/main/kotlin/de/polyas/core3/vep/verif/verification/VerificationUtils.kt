@@ -20,3 +20,24 @@ fun<T> equalSequences(a: Sequence<T>, b: Sequence<T>) : Boolean {
     return !itA.hasNext() && !itB.hasNext()
 }
 
+/**
+ * Applies the given block to each pair of corresponding elements of the given two sequences.
+ * Makes sure that the sequences are of the same length (throws otherwise).
+ */
+fun<A,B> applyToCorresponding(a: Sequence<A>, b: Sequence<B>, block: (A,B) -> Unit) {
+    applyToCorresponding(a.asIterable(), b.asIterable(), block)
+}
+
+/**
+ * Applies the given block to each pair of corresponding elements of the given two iterables.
+ * Makes sure that the sequences are of the same length (throws otherwise).
+ */
+fun<A,B> applyToCorresponding(a: Iterable<A>, b: Iterable<B>, block: (A,B) -> Unit) {
+    val itA = a.iterator()
+    val itB = b.iterator()
+    while (itA.hasNext() && itB.hasNext()) {
+        block(itA.next(), itB.next())
+    }
+    check(!itA.hasNext() && !itB.hasNext()) {"the number of input and output elements is not the same"}
+}
+

@@ -10,7 +10,7 @@ import java.io.File
  */
 class Input(
     baseFolder: File,
-    // private val receiptFolder: File? = null
+    // receiptFolder: File? = null
 ) {
 
     private val reader = JsonFileReader(baseFolder)

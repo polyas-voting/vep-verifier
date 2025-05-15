@@ -6,7 +6,6 @@ import de.polyas.core3.crypto.elgamal.VerificationResult
 import de.polyas.core3.crypto.elgamal.instance.ECElement
 import de.polyas.core3.crypto.elgamal.instance.EllipticCurveInst
 import de.polyas.core3.vep.verif.ballot.BallotDecoder
-import de.polyas.core3.vep.verif.crypto.VerifiableEPBallotAlgo
 import de.polyas.core3.vep.verif.types.*
 import java.lang.String.join
 import java.util.*
@@ -21,7 +20,7 @@ import java.util.*
 object BallotFlaggedVerif {
 
     private val group = EllipticCurveInst()
-    private val ballotVerifier = VerifiableEPBallotAlgo(group)
+    private val ballotVerifier = BallotVerifier(group)
 
     fun verify(
         ek: PublicKeyWithZKP<ECElement>,
@@ -36,19 +35,7 @@ object BallotFlaggedVerif {
         val revokedVoters: Set<String> =
             revocationTokenSequence?.flatMap(RevocationToken::voterIds)?.toSet() ?: emptySet()
 
-        if (revocationTokenSequence == null) {
-            println("  *** INFO: no revocation board found")
-        } else {
-            println("  *** INFO: revocation board found")
-            if (revokedVoters.isEmpty()) {
-                println("  *** INFO: no revoked voters on the revocation board")
-            } else {
-                println("  *** INFO: voters with the following (anonymous) identifiers have been revoked:")
-                revokedVoters.sorted().forEach {
-                    println("      - $it")
-                }
-            }
-        }
+        reportRevokedVoters(revocationTokenSequence, revokedVoters)
 
         // build an auxiliary mapping from voter identifiers to voters;
         // note that at this point there are no duplicated keys (as the registry has been verified)
@@ -132,6 +119,25 @@ object BallotFlaggedVerif {
 
             check (status == Annotated.Status.OK) {
                 "A correct ballot of voter $voterId not marked as valid"
+            }
+        }
+    }
+
+    private fun reportRevokedVoters(
+        revocationTokenSequence: Sequence<RevocationToken>?,
+        revokedVoters: Set<String>
+    ) {
+        if (revocationTokenSequence == null) {
+            println("  *** INFO: no revocation board found")
+        } else {
+            println("  *** INFO: revocation board found")
+            if (revokedVoters.isEmpty()) {
+                println("  *** INFO: no revoked voters on the revocation board")
+            } else {
+                println("  *** INFO: voters with the following (anonymous) identifiers have been revoked:")
+                revokedVoters.sorted().forEach {
+                    println("      - $it")
+                }
             }
         }
     }

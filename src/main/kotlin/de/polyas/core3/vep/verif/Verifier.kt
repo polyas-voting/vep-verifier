@@ -33,13 +33,11 @@ class Verifier(baseFolderName: String) {
         val time = measureTimeMillis {
 
             /// The board integrity
-            //
             // verifying("The board hash chains") {
             //     ExportIntegrity.checkBoards(baseFolder.toPath())
             // }
 
             /// Second device fingerprint
-            //
             // if (input.secondDeviceParametersFingerprint != null) {
             //     verifying("the second device public parameters") {
             //         SDParametersVerif.verify(input.registry, input.electionKey, input.secondDeviceParametersFingerprint)
@@ -49,7 +47,6 @@ class Verifier(baseFolderName: String) {
             // }
 
             /// The receipts
-            //
             // verifying("the receipts") {
             //     ReceiptVerif.verify(input.registry, input::ballotBox, input::receipts)
             // }

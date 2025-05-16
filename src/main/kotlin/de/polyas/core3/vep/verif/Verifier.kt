@@ -1,8 +1,7 @@
 package de.polyas.core3.vep.verif
 
 import de.polyas.core3.vep.verif.input.Input
-import de.polyas.core3.vep.verif.reporting.showBallots
-import de.polyas.core3.vep.verif.reporting.showRegistry
+import de.polyas.core3.vep.verif.reporting.*
 import de.polyas.core3.vep.verif.verification.*
 import java.io.File
 import kotlin.system.measureTimeMillis
@@ -32,12 +31,12 @@ class Verifier(baseFolderName: String) {
 
         val time = measureTimeMillis {
 
-            /// The board integrity
+            //// The board integrity
             // verifying("The board hash chains") {
             //     ExportIntegrity.checkBoards(baseFolder.toPath())
             // }
 
-            /// Second device fingerprint
+            //// Second device fingerprint
             // if (input.secondDeviceParametersFingerprint != null) {
             //     verifying("the second device public parameters") {
             //         SDParametersVerif.verify(input.registry, input.electionKey, input.secondDeviceParametersFingerprint)
@@ -46,11 +45,10 @@ class Verifier(baseFolderName: String) {
             //     println("*** WARN: No file with the second device public parameters given")
             // }
 
-            /// The receipts
+            //// The receipts
             // verifying("the receipts") {
             //     ReceiptVerif.verify(input.registry, input::ballotBox, input::receipts)
             // }
-
 
             verifying("the registry") {
                 RegistryVerif.verify(input.registry)
@@ -96,13 +94,13 @@ class Verifier(baseFolderName: String) {
         println("Verification completed successfully [in ${timeString(time)}]")
         println("*************************************************************")
 
-        // println()
-        // println("TURNOUT INFORMATION:")
-        // reportTurnout(input::ballotFlagged, input.registry)
-        // println()
+        println()
+        println("TURNOUT INFORMATION:")
+        reportTurnout(input::ballotFlagged)
+        println()
 
         // Count the result
-        // Counting(input.registry).counting(input.decryptedPackets())
+        showResult(input.registry, input::decryptedPackets)
     }
 
     private fun checkAndReportBaseFolder() {

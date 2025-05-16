@@ -26,17 +26,13 @@ class BallotDecoder(ballotSpecs: List<BallotSpec>) {
      * Decodes a given encoded [openBallot] and returns a list of decoded
      * ballots or null if decoding fails.
      */
-    fun decodeBallot(openBallot: OpenVote): List<DecodedBallot>? {
-        try {
-            val ballotIds = decodePublicLabel(openBallot.publicLabel)
-            val ballotBytes = Hex.decode(openBallot.ballot)
-            val byteSource = ByteSource(ballotBytes)
-            return ballotIds.map { ballotId ->
-                val decoder = decoders[ballotId] ?: return null // wrong ballot id $ballotId
-                with (decoder) { byteSource.decodeBallot() }
-            }
-        } catch (e: Exception) {
-            return null
+    fun decodeBallot(openBallot: OpenVote): List<DecodedBallot> {
+        val ballotIds = decodePublicLabel(openBallot.publicLabel)
+        val ballotBytes = Hex.decode(openBallot.ballot)
+        val byteSource = ByteSource(ballotBytes)
+        return ballotIds.map { ballotId ->
+            val decoder = decoders[ballotId] ?: error("wrong ballot id $ballotId in the public label")
+            with (decoder) { byteSource.decodeBallot() }
         }
     }
 

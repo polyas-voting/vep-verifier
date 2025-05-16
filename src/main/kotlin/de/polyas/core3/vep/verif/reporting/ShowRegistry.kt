@@ -125,6 +125,4 @@ private fun Fmt.show(list: CandidateList) {
 
 private fun boxes(n: Int) : String = repeatStr(n, "□ ")
 
-
 private val defaultLang = I18n.Language.DE
-

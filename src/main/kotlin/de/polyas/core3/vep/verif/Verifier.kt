@@ -43,9 +43,8 @@ class Verifier(baseFolderName: String, private val receiptsFolderName: String?) 
              }
 
              verifying("board ballot flagged") {
-                 BallotFlaggedVerif.verify(
+                 BallotFlaggedVerif(input.registry).verify(
                      input.electionKey,
-                     input.registry,
                      input::ballotBox,
                      input::ballotFlagged,
                      input::revocationTokens,

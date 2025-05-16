@@ -31,21 +31,18 @@ class Verifier(baseFolderName: String) {
 
         val time = measureTimeMillis {
 
-            //// The board integrity
             // verifying("The board hash chains") {
             //     ExportIntegrity.checkBoards(baseFolder.toPath())
             // }
 
-            //// Second device fingerprint
-            // if (input.secondDeviceParametersFingerprint != null) {
-            //     verifying("the second device public parameters") {
-            //         SDParametersVerif.verify(input.registry, input.electionKey, input.secondDeviceParametersFingerprint)
-            //     }
-            // } else {
-            //     println("*** WARN: No file with the second device public parameters given")
-            // }
+            if (input.secondDeviceParametersFingerprint != null) {
+                verifying("the second device public parameters") {
+                    SDParametersVerif.verify(input.registry, input.electionKey, input.secondDeviceParametersFingerprint)
+                }
+            } else {
+                println("*** WARN: No file with the second device public parameters given")
+            }
 
-            //// The receipts
             // verifying("the receipts") {
             //     ReceiptVerif.verify(input.registry, input::ballotBox, input::receipts)
             // }
@@ -123,5 +120,4 @@ class Verifier(baseFolderName: String) {
             throw e
         }
     }
-
 }

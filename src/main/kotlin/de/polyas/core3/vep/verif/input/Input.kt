@@ -1,6 +1,8 @@
 package de.polyas.core3.vep.verif.input
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import de.polyas.core3.crypto.elgamal.instance.ECElement
 import de.polyas.core3.vep.verif.types.*
 import java.io.File
@@ -70,18 +72,22 @@ class Input(
     //                     .asSequence()
     //             } ?: emptySequence()
 
-    // val secondDeviceParametersFingerprint: SecondDeviceParametersFingerprint? = run {
-    //     val file = baseFolder.resolve("secondDeviceParametersFingerprint.json")
-    //     if (file.exists()) {
-    //         customizedObjectMapper.readValue<SecondDeviceParametersFingerprint>(file)
-    //     } else {
-    //         null
-    //     }
-    // }
+    val secondDeviceParametersFingerprint: SecondDeviceParametersFingerprint? = run {
+         val file = baseFolder.resolve("secondDeviceParametersFingerprint.json")
+         if (file.exists()) {
+             objectMapper.readValue<SecondDeviceParametersFingerprint>(file)
+         } else {
+             null
+         }
+    }
 
     ////
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class WithPayload<T>(val payload:T)
+
+    companion object {
+        val objectMapper = jacksonObjectMapper()
+    }
 }
 

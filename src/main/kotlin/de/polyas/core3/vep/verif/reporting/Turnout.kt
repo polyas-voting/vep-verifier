@@ -26,7 +26,7 @@ fun reportTurnout(ballots: () -> Sequence<Packet<Annotated>>) = fmt {
             .map { it.ballot.ballot.reference }
             .sorted()
             .forEachIndexed { index, voterId ->
-                +"${(index + 1).toString().padStart(3)}.  ${voterId.padEnd(10)}"
+                +"${(index + 1).toString().padStart(5)}.  ${voterId.padEnd(10)}"
             }
     }
 }

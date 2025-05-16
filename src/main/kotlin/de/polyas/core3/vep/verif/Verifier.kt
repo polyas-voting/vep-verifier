@@ -6,35 +6,22 @@ import de.polyas.core3.vep.verif.verification.*
 import java.io.File
 import kotlin.system.measureTimeMillis
 
-class Verifier(baseFolderName: String) {
+class Verifier(baseFolderName: String, private val receiptsFolderName: String?) {
 
-    private val baseFolder = File(baseFolderName).also {
-        require(it.isDirectory) { "$it is not a valid/existing folder" }
-    }
+    private val baseFolder = File(baseFolderName)
+    private val receiptsFolder = receiptsFolderName?.let { File(receiptsFolderName) }
 
-    private val input = Input(baseFolder)
+    private val input = Input(baseFolder, receiptsFolder)
 
     fun performVerification() {
 
-        checkAndReportBaseFolder()
-
-        // val receiptsFile = receiptsFileName
-        //     ?.let { File(receiptsFileName) }
-        //     ?.also { require(it.exists() && it.isDirectory) { "The receipt folder $receiptsFileName does not exist" } }
-        //     .ifNull { println("No folder with receipts given. Therefore NO receipts will be checked.") }
-
+        checkBaseFolder()
+        checkReceiptsFolder()
         println("\nGENERAL ELECTION DATA\n")
-
-        // Display the ballots and the registry
         showBallots(input.registry.ballotStructures)
         showRegistry(input.registry)
 
         val time = measureTimeMillis {
-
-            // verifying("The board hash chains") {
-            //     ExportIntegrity.checkBoards(baseFolder.toPath())
-            // }
-
             if (input.secondDeviceParametersFingerprint != null) {
                 verifying("the second device public parameters") {
                     SDParametersVerif.verify(input.registry, input.electionKey, input.secondDeviceParametersFingerprint)
@@ -43,9 +30,9 @@ class Verifier(baseFolderName: String) {
                 println("*** WARN: No file with the second device public parameters given")
             }
 
-            // verifying("the receipts") {
-            //     ReceiptVerif.verify(input.registry, input::ballotBox, input::receipts)
-            // }
+            verifying("the receipts") {
+                ReceiptVerif.verify(input.registry, input::ballotBox, input::receipts)
+            }
 
             verifying("the registry") {
                 RegistryVerif.verify(input.registry)
@@ -100,7 +87,17 @@ class Verifier(baseFolderName: String) {
         showResult(input.registry, input::decryptedPackets)
     }
 
-    private fun checkAndReportBaseFolder() {
+    private fun checkReceiptsFolder() {
+        if (receiptsFolder == null) {
+            println("No folder with receipts given. Therefore NO receipts will be checked.")
+        } else {
+            require(receiptsFolder.exists() && receiptsFolder.isDirectory) {
+                "The receipt folder $receiptsFolder does not exist"
+            }
+        }
+    }
+
+    private fun checkBaseFolder() {
         require(baseFolder.isDirectory) { "$baseFolder is not a valid/existing folder" }
         println("Verification of election data located in $baseFolder")
         println("(full path = ${baseFolder.absoluteFile})\n")

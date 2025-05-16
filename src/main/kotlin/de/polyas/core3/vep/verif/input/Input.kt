@@ -12,7 +12,7 @@ import java.io.File
  */
 class Input(
     baseFolder: File,
-    // receiptFolder: File? = null
+    private val receiptFolder: File? = null
 ) {
 
     private val reader = JsonFileReader(baseFolder)
@@ -56,21 +56,18 @@ class Input(
         reader.sequence<WithPayload<MessageWithProofPacket>>("decryption-decrypt-Polyas.json")
             .map { it.payload }
 
-
-    ////
-
-    // fun receipts(): Sequence<Receipt> =
-    //     receiptFolder?.takeIf { it.exists() && it.isDirectory}
-    //             ?.let { receiptPath ->
-    //                 (receiptPath.listFiles() ?: emptyArray())
-    //                     .filter { !it.isDirectory }
-    //                     .filter { it.extension == "pdf" }
-    //                     .mapNotNull { file ->
-    //                         file.pdfToText().receipt()
-    //                             .also { if (it == null) println("  *** WARN: - No receipt found in file $file") }
-    //                     }
-    //                     .asSequence()
-    //             } ?: emptySequence()
+    fun receipts(): Sequence<Receipt> =
+        receiptFolder?.takeIf { it.exists() && it.isDirectory }
+            ?.let { receiptPath ->
+                (receiptPath.listFiles() ?: emptyArray())
+                    .asSequence()
+                    .filter { !it.isDirectory }
+                    .filter { it.extension == "pdf" }
+                    .mapNotNull { file ->
+                        file.pdfToText().receipt()
+                            .also { if (it == null) println("  *** WARN: - No receipt found in file $file") }
+                    }
+            } ?: emptySequence()
 
     val secondDeviceParametersFingerprint: SecondDeviceParametersFingerprint? = run {
          val file = baseFolder.resolve("secondDeviceParametersFingerprint.json")
@@ -89,5 +86,19 @@ class Input(
     companion object {
         val objectMapper = jacksonObjectMapper()
     }
+}
+
+private fun String.receipt(): Receipt? {
+    fun extract(beginTag: String, endTag: String): String =
+        substringAfter(beginTag, "")
+            .substringBefore(endTag, "")
+            .filterNot { it.isWhitespace() }
+
+    val fingerprint = extract("-----BEGIN FINGERPRINT-----", "-----END FINGERPRINT-----")
+    val signature = extract("-----BEGIN SIGNATURE-----", "-----END SIGNATURE-----")
+    return if (fingerprint.isNotBlank() and signature.isNotBlank())
+        Receipt(fingerprint, signature)
+    else
+        null
 }
 

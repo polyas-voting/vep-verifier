@@ -35,8 +35,8 @@ class Input(
         reader.sequence<WithPayload<BallotPackage>>("ballot-box.json")
             .map { it.payload }
 
-    fun ballotFlagged(): Sequence<Packet<Annotated>> =
-        reader.sequence<WithPayload<Packet<Annotated>>>("ballot-flagged.json")
+    fun ballotFlagged(): Sequence<Packet<AnnotatedBallot>> =
+        reader.sequence<WithPayload<Packet<AnnotatedBallot>>>("ballot-flagged.json")
             .map { it.payload }
 
     fun ballotFilteredOut(): Sequence<String> {

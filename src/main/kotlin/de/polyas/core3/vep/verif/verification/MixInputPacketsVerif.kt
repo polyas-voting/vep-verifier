@@ -14,7 +14,7 @@ object MixInputPacketsVerif {
 
     fun verify(
         registry: Registry,
-        ballotFlagged: () -> Sequence<Packet<Annotated>>,
+        ballotFlagged: () -> Sequence<Packet<AnnotatedBallot>>,
         mixPackets: () -> Sequence<MixPacket>
     ) {
         checkOrder(registry, ballotFlagged, mixPackets)
@@ -26,14 +26,14 @@ object MixInputPacketsVerif {
      */
     private fun checkOrder(
         registry: Registry,
-        ballotFlagged: () -> Sequence<Packet<Annotated>>,
+        ballotFlagged: () -> Sequence<Packet<AnnotatedBallot>>,
         mixPackets: () -> Sequence<MixPacket>
     ) {
         for (label in publicLabels(registry)) {
             val inputStream: Sequence<List<Ciphertext<ECElement>>> =
                 ballotFlagged()
                     .flatMap { it.values }
-                    .filter { it.status == Annotated.Status.OK && it.ballot.ballot.publicLabel == label } // only correct ballots with the considered label
+                    .filter { it.status == AnnotatedBallot.Status.OK && it.ballot.ballot.publicLabel == label } // only correct ballots with the considered label
                     .map { it.ballot.ballot.encryptedChoice } // take the encrypted choice
                     .map { it.ciphertexts }
 

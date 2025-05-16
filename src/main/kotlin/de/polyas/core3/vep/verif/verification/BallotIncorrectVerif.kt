@@ -1,6 +1,6 @@
 package de.polyas.core3.vep.verif.verification
 
-import de.polyas.core3.vep.verif.types.Annotated
+import de.polyas.core3.vep.verif.types.AnnotatedBallot
 import de.polyas.core3.vep.verif.types.Packet
 
 /**
@@ -11,7 +11,7 @@ import de.polyas.core3.vep.verif.types.Packet
 object BallotIncorrectVerif {
 
     fun verify(
-        ballotFlagged: () -> Sequence<Packet<Annotated>>,
+        ballotFlagged: () -> Sequence<Packet<AnnotatedBallot>>,
         ballotIncorrect: () -> Sequence<String>
     ) {
         // we count and compare the number of flagged ballots and the number
@@ -19,10 +19,10 @@ object BallotIncorrectVerif {
 
         val revokedCount: Int = ballotFlagged()
             .flatMap { it.values }
-            .count { it.status == Annotated.Status.REVOKED }
+            .count { it.status == AnnotatedBallot.Status.REVOKED }
         val incorrectCount: Int = ballotFlagged()
             .flatMap { it.values }
-            .count { it.status == Annotated.Status.INCORRECT }
+            .count { it.status == AnnotatedBallot.Status.INCORRECT }
         val rejectedCount: Int = ballotIncorrect().count()
         val flaggedCount = revokedCount + incorrectCount
 

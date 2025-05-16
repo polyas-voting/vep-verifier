@@ -27,7 +27,7 @@ object BallotFlaggedVerif {
         ek: PublicKeyWithZKP<ECElement>,
         registry: Registry,
         ballotBox: () -> Sequence<BallotPackage>,
-        ballotFlagged: () -> Sequence<Packet<Annotated>>,
+        ballotFlagged: () -> Sequence<Packet<AnnotatedBallot>>,
         revocationTokens: () -> Sequence<RevocationToken>?,
     ) {
         println("  *** INFO: the number of cast ballot packets = ${ballotBox().count()}. A packet may contain multiple ballots.")
@@ -58,7 +58,7 @@ object BallotFlaggedVerif {
 
     private fun checkCorrespondingEntries(
         ballotEntry: BallotEntry,
-        flagged: Annotated,
+        flagged: AnnotatedBallot,
         votersById: Map<String, Voter>,
         ek: PublicKeyWithZKP<ECElement>,
         registry: Registry,
@@ -74,7 +74,7 @@ object BallotFlaggedVerif {
         }
 
         if (voter == null) {
-            check(status == Annotated.Status.INCORRECT) {
+            check(status == AnnotatedBallot.Status.INCORRECT) {
                 "Ballot of voter $voterId should be marked as incorrect: invalid voter identifier"
             }
             return
@@ -89,15 +89,15 @@ object BallotFlaggedVerif {
 
         when (expectedAnnotation) {
             is ExpectedAnnotation.OK ->
-                check(status == Annotated.Status.OK) {
+                check(status == AnnotatedBallot.Status.OK) {
                     "A correct ballot of voter $voterId not marked as valid"
                 }
             is ExpectedAnnotation.Incorrect ->
-                check(status == Annotated.Status.INCORRECT) {
+                check(status == AnnotatedBallot.Status.INCORRECT) {
                     "Ballot of voter $voterId should be marked as incorrect: ${expectedAnnotation.reason}"
                 }
             is ExpectedAnnotation.Revoked ->
-                check(status == Annotated.Status.REVOKED) {
+                check(status == AnnotatedBallot.Status.REVOKED) {
                     "Ballot of voter $voterId should be marked as revoked"
                 }
         }

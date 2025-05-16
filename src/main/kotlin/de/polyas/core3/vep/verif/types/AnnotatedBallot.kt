@@ -1,6 +1,6 @@
 package de.polyas.core3.vep.verif.types
 
-data class Annotated(
+data class AnnotatedBallot(
     val ballot: BallotEntry,
     val status: Status,
     val annotation: String

@@ -6,7 +6,20 @@ import de.polyas.core3.vep.verif.verification.*
 import java.io.File
 import kotlin.system.measureTimeMillis
 
-class Verifier(baseFolderName: String, private val receiptsFolderName: String?) {
+/**
+ * Verifier implementing the universal verification procedure for Polyas Core 3 VerifiableEP.
+ *
+ * @param baseFolderName Folder with the (unpacked) content of the verificatino package
+ * @param receiptsFolderName Optional folder with voter's receipts (PDFs)
+ * @param anonymousRevocations Only relevant for election with revocations. If true, the voters are revoked by
+ *      their anonymous references; if false, by voter identifiers (in this case the system does not provide
+ *      everlasting privacy, as the references are deterministically derived from voter identifiers).
+ */
+class Verifier(
+    baseFolderName: String,
+    private val receiptsFolderName: String?,
+    private val anonymousRevocations: Boolean
+) {
 
     private val baseFolder = File(baseFolderName)
     private val receiptsFolder = receiptsFolderName?.let { File(receiptsFolderName) }
@@ -43,7 +56,7 @@ class Verifier(baseFolderName: String, private val receiptsFolderName: String?) 
              }
 
              verifying("board ballot flagged") {
-                 BallotFlaggedVerif(input.registry).verify(
+                 BallotFlaggedVerif(input.registry, anonymousRevocations = anonymousRevocations).verify(
                      input.electionKey,
                      input::ballotBox,
                      input::ballotFlagged,

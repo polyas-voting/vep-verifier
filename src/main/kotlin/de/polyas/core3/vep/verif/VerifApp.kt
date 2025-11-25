@@ -21,7 +21,8 @@ object VerifApp {
             val receiptsFolder = args.getOrNull(1)
             if(checkFolder(baseFolder) && (receiptsFolder == null || checkFolder(receiptsFolder))) {
                 try {
-                    Verifier(baseFolder, receiptsFolder).performVerification()
+                    Verifier(baseFolder, receiptsFolder, anonymousRevocations = false)
+                        .performVerification()
                 } catch (e: Exception) {
                     println("The verification process failed with the following error: ${e.message}")
                 }

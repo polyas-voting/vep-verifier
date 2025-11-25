@@ -8,6 +8,7 @@ import de.polyas.core3.crypto.elgamal.instance.EllipticCurveInst
 import de.polyas.core3.vep.verif.ballot.BallotDecoder
 import de.polyas.core3.vep.verif.types.*
 import java.lang.String.join
+import java.math.BigInteger
 import java.util.*
 
 /**
@@ -19,6 +20,7 @@ import java.util.*
  */
 class BallotFlaggedVerif(
     private val registry: Registry,
+    private val anonymousRevocations: Boolean
 ) {
     private val group = EllipticCurveInst()
     private val ballotVerifier = BallotVerifier(group)
@@ -36,6 +38,7 @@ class BallotFlaggedVerif(
         val revokedVoters: Set<String> =
             revocationTokenSequence
                 ?.flatMap(RevocationToken::voterIds)
+                ?.map(::voterIdFromRevocationVoterId)
                 ?.toSet()
                 ?: emptySet()
 
@@ -194,6 +197,10 @@ class BallotFlaggedVerif(
             ExpectedAnnotation.OK
         }
     }
+    
+    private fun voterIdFromRevocationVoterId(revocationVoterId: String): String =
+        if (anonymousRevocations) revocationVoterId
+        else AnonymousReferences.reference(revocationVoterId, BigInteger.ZERO) // deterministic references
 }
 
 

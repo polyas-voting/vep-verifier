@@ -15,7 +15,7 @@ class BallotFlaggedVerifTest {
     fun `data from sample folder passes verification`() {
         val data = Input(baseFolder = File("test-data/small-with-revocations"))
 
-        BallotFlaggedVerif(data.registry).verify(
+        BallotFlaggedVerif(data.registry, anonymousRevocations = true).verify(
             ballotBox = data::ballotBox,
             ballotFlagged = data::ballotFlagged,
             ek = data.electionKey,
@@ -30,7 +30,7 @@ class BallotFlaggedVerifTest {
         val modifiedBallots = ballots + ballots[0]
 
         expectFailureWith("the number of input and output elements is not the same") {
-            BallotFlaggedVerif(data.registry).verify(
+            BallotFlaggedVerif(data.registry, anonymousRevocations = true).verify(
                 ballotBox = modifiedBallots.asLazySequence(),
                 ballotFlagged = data::ballotFlagged,
                 ek = data.electionKey,
@@ -49,7 +49,7 @@ class BallotFlaggedVerifTest {
         val modifiedFlaggedBallots = flaggedBallots + flaggedBallots[0]
 
         expectFailureWith("Duplicated ballot") {
-            BallotFlaggedVerif(data.registry).verify(
+            BallotFlaggedVerif(data.registry, anonymousRevocations = true).verify(
                 ballotBox = modifiedBallots.asLazySequence() ,
                 ballotFlagged = modifiedFlaggedBallots.asLazySequence(),
                 ek = data.electionKey,
@@ -74,7 +74,7 @@ class BallotFlaggedVerifTest {
         )
         val modifiedFlaggedBallots = flaggedBallots + Packet(listOf(extraFlagged))
 
-        BallotFlaggedVerif(data.registry).verify(
+        BallotFlaggedVerif(data.registry, anonymousRevocations = true).verify(
             ballotBox = modifiedBallots.asLazySequence(),
             ballotFlagged = modifiedFlaggedBallots.asLazySequence(),
             ek = data.electionKey,
@@ -93,7 +93,7 @@ class BallotFlaggedVerifTest {
         )
 
         expectFailureWith("mismatched public label") {
-            BallotFlaggedVerif(modifiedRegistry).verify(
+            BallotFlaggedVerif(modifiedRegistry, anonymousRevocations = true).verify(
                 ballotBox = data::ballotBox,
                 ballotFlagged = data::ballotFlagged,
                 ek = data.electionKey,
@@ -114,7 +114,7 @@ class BallotFlaggedVerifTest {
 
         val modifiedFlagged = data.ballotFlagged().toList().deepMap { it.copy(status = AnnotatedBallot.Status.INCORRECT) }
 
-        BallotFlaggedVerif(modifiedRegistry).verify(
+        BallotFlaggedVerif(modifiedRegistry, anonymousRevocations = true).verify(
             ballotBox = data::ballotBox,
             ballotFlagged = modifiedFlagged.asLazySequence(),
             ek = data.electionKey,
@@ -140,7 +140,7 @@ class BallotFlaggedVerifTest {
         }
 
         expectFailureWith("invalid zero-knowledge proof") {
-            BallotFlaggedVerif(data.registry).verify(
+            BallotFlaggedVerif(data.registry, anonymousRevocations = true).verify(
                 ballotBox = modifiedBallots.asLazySequence(),
                 ballotFlagged = modifiedFlagged.asLazySequence(),
                 ek = data.electionKey,
@@ -167,7 +167,7 @@ class BallotFlaggedVerifTest {
         }
 
         expectFailureWith("invalid zero-knowledge proof") {
-            BallotFlaggedVerif(data.registry).verify(
+            BallotFlaggedVerif(data.registry, anonymousRevocations = true).verify(
                 ballotBox = modifiedBallots.asLazySequence(),
                 ballotFlagged = modifiedFlagged.asLazySequence(),
                 ek = data.electionKey,
@@ -188,7 +188,7 @@ class BallotFlaggedVerifTest {
         val revocationTokens = revokedVoterIds.map { RevocationToken("election-id", listOf(it)) }
 
         expectFailureWith("should be marked as revoked") {
-            BallotFlaggedVerif(registry).verify(
+            BallotFlaggedVerif(registry, anonymousRevocations = true).verify(
                 ballotBox = data::ballotBox,
                 ballotFlagged = data::ballotFlagged,
                 ek = data.electionKey,

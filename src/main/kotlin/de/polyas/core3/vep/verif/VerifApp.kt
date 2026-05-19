@@ -21,6 +21,7 @@ object VerifApp {
             val receiptsFolder = args.getOrNull(1)
             if(checkFolder(baseFolder) && (receiptsFolder == null || checkFolder(receiptsFolder))) {
                 try {
+                    // Note: type of revocations hardcoded now; to be made configurable via command-line parameters
                     Verifier(baseFolder, receiptsFolder, anonymousRevocations = false)
                         .performVerification()
                 } catch (e: Exception) {

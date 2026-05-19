@@ -88,6 +88,8 @@ class BallotFlaggedVerif(
                 .and { checkZkp(ek, ballotEntry, voter) }
                 .and { checkRevocation(voter.id, revokedVoters) }
 
+        votersWhoVoted += voterId
+
         when (expectedAnnotation) {
             is ExpectedAnnotation.OK ->
                 check(status == AnnotatedBallot.Status.OK) {
@@ -161,13 +163,12 @@ class BallotFlaggedVerif(
      */
     private fun checkDuplicates(
         ballotEntry: BallotEntry,
-        votersWhoVoted: MutableSet<String>
+        votersWhoVoted: Set<String>
     ): ExpectedAnnotation {
         val voterId = ballotEntry.ballot.reference
         if (voterId in votersWhoVoted) {
             return ExpectedAnnotation.Incorrect("Duplicated ballot of voter $voterId")
         } else {
-            votersWhoVoted += voterId
             return ExpectedAnnotation.OK
         }
     }

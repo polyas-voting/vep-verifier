@@ -12,11 +12,13 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.code.style>official</kotlin.code.style>
-        <kotlin.compiler.jvmTarget>21</kotlin.compiler.jvmTarget>
-        <jackson.version>2.18.1</jackson.version>
-        <bouncycastle.version>1.79</bouncycastle.version>
-        <kotlin.version>2.2.21</kotlin.version>
-        <java.version>21</java.version>
+
+        <java.version>25</java.version>
+        <kotlin.compiler.jvmTarget>25</kotlin.compiler.jvmTarget>
+        <kotlin.version>2.3.21</kotlin.version>
+        <jackson.version>2.21.3</jackson.version>
+        <bouncycastle.version>1.84</bouncycastle.version>
+
     </properties>
 
     <build>
@@ -143,7 +145,7 @@
         <dependency>
             <groupId>de.polyas.core3</groupId>
             <artifactId>crypto-elgamal</artifactId>
-            <version>0.9.4</version>
+            <version>1.2.7</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId>

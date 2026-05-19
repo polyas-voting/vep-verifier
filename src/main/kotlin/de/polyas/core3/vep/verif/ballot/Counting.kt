@@ -95,6 +95,9 @@ data class BallotResult(
 
 private inline fun DecodedBallot.forEachChosenOption(block: (String, Int) -> Unit) {
     for (list in decodedLists) {
+        if (list.votes != 0) {
+            block(list.id, list.votes)
+        }
         for (candidate in list.decodedCandidates) {
             block(candidate.id, candidate.votes)
         }

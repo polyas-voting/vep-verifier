@@ -9,7 +9,7 @@ import kotlin.system.measureTimeMillis
 /**
  * Verifier implementing the universal verification procedure for Polyas Core 3 VerifiableEP.
  *
- * @param baseFolderName Folder with the (unpacked) content of the verificatino package
+ * @param baseFolderName Folder with the (unpacked) content of the verification package
  * @param receiptsFolderName Optional folder with voter's receipts (PDFs)
  * @param anonymousRevocations Only relevant for election with revocations. If true, the voters are revoked by
  *      their anonymous references; if false, by voter identifiers (in this case the system does not provide
@@ -20,7 +20,6 @@ class Verifier(
     private val receiptsFolderName: String?,
     private val anonymousRevocations: Boolean
 ) {
-
     private val baseFolder = File(baseFolderName)
     private val receiptsFolder = receiptsFolderName?.let { File(receiptsFolderName) }
 
@@ -115,8 +114,6 @@ class Verifier(
         println("(full path = ${baseFolder.absoluteFile})\n")
     }
 
-    private fun timeString(timeInMs: Long) = if (timeInMs<10000) "$timeInMs ms" else "${(timeInMs+500)/1000} s"
-
     private inline fun verifying(verifiedElementName: String, block: () -> Unit) {
         println("[ Verifying $verifiedElementName...")
         try {
@@ -129,4 +126,6 @@ class Verifier(
             throw e
         }
     }
+
+    private fun timeString(timeInMs: Long) = if (timeInMs<10000) "$timeInMs ms" else "${(timeInMs+500)/1000} s"
 }

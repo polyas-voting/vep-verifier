@@ -32,8 +32,6 @@ class BallotFlaggedVerif(
         ballotFlagged: () -> Sequence<Packet<AnnotatedBallot>>,
         revocationTokens: () -> Sequence<RevocationToken>?,
     ) {
-        println("  *** INFO: the number of cast ballot packets = ${ballotBox().count()}. A packet may contain multiple ballots.")
-
         val revocationTokenSequence = revocationTokens()
         val revokedVoters: Set<String> =
             revocationTokenSequence
@@ -45,7 +43,7 @@ class BallotFlaggedVerif(
         reportRevokedVoters(revocationTokenSequence, revokedVoters)
 
         // build an auxiliary mapping from voter identifiers to voters;
-        // note that at this point there are no duplicated keys (as the registry has been verified)
+        // we assume that at this point there are no duplicated keys (since the registry has been verified)
         val votersById: Map<String, Voter> = registry.voters.associateBy(Voter::id)
 
         // we maintain the list of voters whose ballots have been processed so far (used to detect duplicates)

@@ -57,7 +57,7 @@ object DecryptedPacketsVerif {
             .getOrElse { error("Cannot decode a message on the decryption board: ${it.message}") }
 
         check (messageWithProof.message == expectedMessage) {
-            "A message on the decryptino baord does not have the expected value: " +
+            "A message on the decryption board does not have the expected value: " +
                     " given message = ${messageWithProof.message}, expected = $expectedMessage"
         }
     }

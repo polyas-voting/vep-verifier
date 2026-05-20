@@ -1,0 +1,36 @@
+{
+  "testCaseName" : "ballot-verif-zkp-size-mismatch",
+  "testDataType" : "BallotVerificationInput",
+  "testData" : {
+    "publicKey" : "034caa95a6b2e07aff40331ac76ea93b3d00c12f750cf2fb61b8942b3b2721e457",
+    "publicCredential" : "02db98495a720224afe2430c212fa09226358dd367b6c842cc26fb5c420ddbcd49",
+    "ballot" : {
+      "encryptedChoice" : {
+        "ciphertexts" : [ {
+          "x" : "02552f674be642cccd5fc8dba87f43ccf0578bbcc78e9718372ee2cb02979d9f17",
+          "y" : "03ff70305d02ac059cb12199f9cbcbd5beee10027de9fd3b129ae572c8150c0ed9"
+        }, {
+          "x" : "031aa0ce5d3dab61adfb63d83f81950d986e6f1c2b654bc696c1b689b222713dc5",
+          "y" : "02277afeda4b74c9360312d3a5b5126c32577ef1ec764977ed208f2b28f4cccbdb"
+        }, {
+          "x" : "03a77976d67faca0f7fb8bc0adac138ccd27aa6082958c4355da9f4be1cf535058",
+          "y" : "021ce57f8921403a4bccd3ba70cfd7464a1f2adf0e6c93d347083f65b1ca533ceb"
+        } ]
+      },
+      "zkp" : [ {
+        "c" : "110621064188442862320210726472105285835489444108501089336937486475287083272065",
+        "f" : "54868684101418832093596596000443523580693260781997748167741278182928178111716"
+      }, {
+        "c" : "100409572647098512774690233464945125525679432868502567080373085583670081237960",
+        "f" : "80487749752154770775059914053511501325346503640555511022139686009074052006493"
+      } ],
+      "publicLabel" : "a",
+      "reference" : "LIVGgR-pnzQra-D4pNRG-xn6G",
+      "signature" : {
+        "c" : "33395490499833278189103190740577467775441469650710106420916339187896855948385",
+        "f" : "349664615405806860476744240167967751343998903938204474469447324677744695493"
+      }
+    }
+  },
+  "expectedResult" : "Failure: ZKP of knowledge of encryption coins has invalid length"
+}

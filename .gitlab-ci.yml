@@ -1,0 +1,14 @@
+include:
+  - project: 'ng/open-base'
+    ref: main
+    file: '/templates/gitlab.yml'
+
+build:
+  extends: .maven-build
+
+deploy:
+  extends: .maven-deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "draft"
+    - if: $CI_COMMIT_TAG

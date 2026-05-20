@@ -1,0 +1,46 @@
+/*
+ * Copyright 2026 Polyas GmbH
+ *
+ * Licensed under GNU Affero General Public License v3.0; you may not use
+ * this file except in compliance with the License. You may obtain a copy of
+ * the License at https://www.gnu.org/licenses/agpl-3.0.en.html.
+ * This software is distributed WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+ * either express or implied.
+ */
+
+package de.polyas.core3.vep.verif
+
+import java.io.File
+import java.security.Provider
+import java.security.Security
+
+object VerifApp {
+
+    init {
+        Security.addProvider(org.bouncycastle.jce.provider.BouncyCastleProvider() as Provider?)
+    }
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        if (args.size !in 1 .. 2) {
+            println("The program expects one required and a second optional parameter")
+            println("First parameter (required): The folder name where the verification data files are placed")
+            println("Second parameter (optional): A folder containing receipt PDFs to be checked")
+        } else {
+            val baseFolder = args[0]
+            val receiptsFolder = args.getOrNull(1)
+            if(checkFolder(baseFolder) && (receiptsFolder == null || checkFolder(receiptsFolder))) {
+                try {
+                    // Note: type of revocations hardcoded now; to be made configurable via command-line parameters
+                    Verifier(baseFolder, receiptsFolder, anonymousRevocations = false)
+                        .performVerification()
+                } catch (e: Exception) {
+                    println("The verification process failed with the following error: ${e.message}")
+                }
+            }
+        }
+    }
+
+    private fun checkFolder(folder: String): Boolean =
+        File(folder).isDirectory.also { if (!it) println("$folder is not a valid/existing folder name") }
+}

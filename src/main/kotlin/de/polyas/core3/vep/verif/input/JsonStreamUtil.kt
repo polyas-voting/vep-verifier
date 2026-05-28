@@ -10,9 +10,12 @@
 
 package de.polyas.core3.vep.verif.input
 
+import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonToken
+import com.fasterxml.jackson.core.StreamReadConstraints
 import com.fasterxml.jackson.databind.MappingJsonFactory
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import de.polyas.core3.vep.verif.input.Input.WithPayload
@@ -54,7 +57,9 @@ internal class JsonFileReader(private val baseDirectory: File) {
         baseDirectory.resolve(filename).exists()
 
     companion object {
-        private val streamUtilObjectMapper = jacksonObjectMapper()
+        private const val JSON_STRING_MAX_LEN = 10 * 20_000_000
+
+        private val streamUtilObjectMapper = jacksonObjectMapper().adjustMaxStringLength()
 
         fun strSequenceFromJsonFile(jsonFile: File): Sequence<String> = sequence {
             val jp = createJsonParser(jsonFile)
@@ -73,8 +78,19 @@ internal class JsonFileReader(private val baseDirectory: File) {
             }
         }
 
-        private fun createJsonParser(jsonFile: File) : JsonParser =
-            MappingJsonFactory().createParser(jsonFile)
+        private fun createJsonParser(jsonFile: File): JsonParser =
+            MappingJsonFactory().adjustMaxStringLength().createParser(jsonFile)
+
+        private fun JsonFactory.adjustMaxStringLength(): JsonFactory {
+            val constraints = StreamReadConstraints.builder().maxStringLength(JSON_STRING_MAX_LEN).build()
+            this.setStreamReadConstraints(constraints)
+            return this
+        }
+
+        private fun ObjectMapper.adjustMaxStringLength(): ObjectMapper {
+            this.factory.adjustMaxStringLength()
+            return this
+        }
     }
 }
 

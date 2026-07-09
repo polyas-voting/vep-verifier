@@ -51,7 +51,7 @@ object RegistryVerif {
     private fun checkPublicLabels(registry: Registry) {
         // collect ballot identifiers
         val ballotIds: Set<String> = registry.ballotStructures.asSequence()
-            .map { it.id }
+            .map { it.id.value }
             .toSet()
 
         // and check that each voter has a valid public label

@@ -10,11 +10,13 @@
 
 package de.polyas.core3.vep.verif.reporting
 
-import de.polyas.core3.vep.verif.ballot.BallotResult
-import de.polyas.core3.vep.verif.ballot.Counting
-import de.polyas.core3.vep.verif.types.BallotSpec
-import de.polyas.core3.vep.verif.types.CandidateSpec
-import de.polyas.core3.vep.verif.types.I18n.Language
+import de.polyas.core3.vep.verif.ballot.counting.CountingResult
+import de.polyas.core3.vep.verif.ballot.counting.Counting
+import de.polyas.core3.vep.verif.ballot.model.BallotId
+import de.polyas.core3.vep.verif.ballot.model.BallotSpec
+import de.polyas.core3.vep.verif.ballot.model.CandidateSpec
+import de.polyas.core3.vep.verif.ballot.model.Language
+import de.polyas.core3.vep.verif.ballot.model.OpenedVote
 import de.polyas.core3.vep.verif.types.MessageWithProofPacket
 import de.polyas.core3.vep.verif.types.Registry
 
@@ -23,31 +25,37 @@ fun showResult(
     decryptedPackets: () -> Sequence<MessageWithProofPacket>,
     lang: Language = Language.DE
 ) {
-    val results = Counting(registry).count(decryptedPackets)
+    val openVotes = decryptedPacketsToOpenVotes(decryptedPackets())
+    val results = Counting(registry.ballotStructures).count(openVotes)
     formatBallotResults(registry, results, lang)
 }
 
-private fun formatBallotResults(registry: Registry, results: List<BallotResult>, lang: Language) = fmt {
-    val ballotSpecById: Map<String, BallotSpec> = registry.ballotStructures.associateBy { it.id }
+private fun decryptedPacketsToOpenVotes(decryptedPackets: Sequence<MessageWithProofPacket>): Sequence<OpenedVote> =
+    decryptedPackets.flatMap { packet ->
+        packet.messagesWithZKP.asSequence().map { OpenedVote(it.message.asHexString(), packet.publicLabel) }
+    }
+
+private fun formatBallotResults(registry: Registry, results: List<CountingResult>, lang: Language) = fmt {
+    val ballotSpecById: Map<BallotId, BallotSpec> = registry.ballotStructures.associateBy { it.id }
 
     +"RESULT:"
 
     results.forEach { ballotResult ->
-        val ballotSpec = ballotSpecById[ballotResult.ballotId]
-        check(ballotSpec != null) { "Ballot specification missing for ballot id ${ballotResult.ballotId}" }
+        val ballotSpec = ballotSpecById[ballotResult.ballot]
+        check(ballotSpec != null) { "Ballot specification missing for ballot id ${ballotResult.ballot}" }
         formatBallotResult(ballotResult, ballotSpec, lang)
     }
 }
 
-private fun Fmt.formatBallotResult(result: BallotResult, ballotSpec: BallotSpec, lang: Language) {
+private fun Fmt.formatBallotResult(result: CountingResult, ballotSpec: BallotSpec, lang: Language) {
 
-    val votes: Map<String, Int> = result.castedVotes.associateBy({ it.candidate }, { it.votes }) // choiceId -> #votes
+    val votes: Map<String, Int> = result.votes.associateBy({ it.choiceId }, { it.countedVotes }) // choiceId -> #votes
 
     +""
 
-    framed("Ballot [${result.ballotId}]: ${ballotSpec.title[lang]}") {
-
-        +"Cast sheets: ${result.castSheets}, valid: ${result.validSheets}, malformed: ${result.malformed}, marked as abstention: ${result.abstained}, intentionally invalid: ${result.intentionallyInvalid}, invalid: ${result.invalidSheets}"
+    framed("Ballot [${result.ballot}]: ${ballotSpec.title[lang]}") {
+        val res = result
+        +"Cast sheets: ${res.cast}, valid: ${res.valid}, malformed: ${res.malformed}, marked as abstention: ${res.abstained}, intentionally invalid: ${res.markedInvalid}, invalid: ${res.invalid}"
 
         for (list in ballotSpec.lists) {
             val headers = list.columnHeaders.joinToString(separator = " | ") { it[lang] }

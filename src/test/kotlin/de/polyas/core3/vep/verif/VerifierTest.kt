@@ -26,4 +26,11 @@ class VerifierTest {
         val verifier = Verifier(baseFolderName = "test-data/small-with-revocations", receiptsFolderName = null, anonymousRevocations = true)
         verifier.performVerification()
     }
+
+    @Test
+    fun `with sparse encoding`() {
+        val path = "test-data/small-with-sparse-encoding"
+        val verifier = Verifier(baseFolderName = path, receiptsFolderName = null, anonymousRevocations = true)
+        verifier.performVerification()
+    }
 }

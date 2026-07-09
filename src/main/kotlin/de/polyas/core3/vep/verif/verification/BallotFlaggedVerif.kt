@@ -15,7 +15,7 @@ import de.polyas.core3.crypto.elgamal.MultiPlaintext
 import de.polyas.core3.crypto.elgamal.VerificationResult
 import de.polyas.core3.crypto.elgamal.instance.ECElement
 import de.polyas.core3.crypto.elgamal.instance.EllipticCurveInst
-import de.polyas.core3.vep.verif.ballot.BallotDecoder
+import de.polyas.core3.vep.verif.ballot.decoding.BallotDecoder
 import de.polyas.core3.vep.verif.types.*
 import java.lang.String.join
 import java.math.BigInteger
@@ -152,7 +152,7 @@ class BallotFlaggedVerif(
     }
 
     private fun checkCiphertextLength(ballot: Ballot<ECElement>): ExpectedAnnotation {
-        val expectedPlaintextSize = ballotDecoder.encodedPlaintextSize(ballot.publicLabel)
+        val expectedPlaintextSize = ballotDecoder.encodedBallotSize(ballot.publicLabel)
             ?: return ExpectedAnnotation.Incorrect("The ballot has incorrect public label ${ballot.publicLabel}")
         val expectedCiphertextLength = ciphertextSize(expectedPlaintextSize)
 

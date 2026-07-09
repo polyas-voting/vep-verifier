@@ -10,7 +10,10 @@
 
 package de.polyas.core3.vep.verif.reporting
 
-import de.polyas.core3.vep.verif.types.*
+import de.polyas.core3.vep.verif.ballot.model.BallotSpec
+import de.polyas.core3.vep.verif.ballot.model.CandidateListSpec
+import de.polyas.core3.vep.verif.ballot.model.Language
+import de.polyas.core3.vep.verif.types.Registry
 
 fun showRegistry(registry: Registry) {
 
@@ -95,7 +98,7 @@ private fun Fmt.show(ballot: BallotSpec) {
     }
 }
 
-private fun Fmt.show(list: CandidateList) {
+private fun Fmt.show(list: CandidateListSpec) {
 
     val title = list.title?.get(defaultLang) ?: "(no title)"
 
@@ -135,4 +138,4 @@ private fun Fmt.show(list: CandidateList) {
 
 private fun boxes(n: Int) : String = repeatStr(n, "□ ")
 
-private val defaultLang = I18n.Language.DE
+private val defaultLang = Language.DE

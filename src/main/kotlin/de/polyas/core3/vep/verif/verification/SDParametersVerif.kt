@@ -14,6 +14,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import de.polyas.core3.crypto.elgamal.instance.ECElement
 import de.polyas.core3.crypto.std.Hashes
+import de.polyas.core3.vep.verif.ballot.model.BallotSpec
 import de.polyas.core3.vep.verif.types.*
 import org.bouncycastle.util.encoders.Hex
 

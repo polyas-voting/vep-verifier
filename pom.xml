@@ -6,7 +6,7 @@
 
     <groupId>de.polyas.core3</groupId>
     <artifactId>vep-verifier</artifactId>
-    <version>0.4.0</version>
+    <version>0.4.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>

@@ -190,9 +190,9 @@ private fun choiceIdByCandidateId(ballot: BallotSpec, votesById: MutableMap<Stri
         for (list in ballot.lists) {
             put(list.id, list.id)
 
-            for (c in list.candidates) {
-                if (c.writeInSize == null) {
-                    put(c.id, c.id)
+            for (candidate in list.candidates) {
+                if (candidate.writeInSize == null) {
+                    put(candidate.id, candidate.id)
                 }
             }
 

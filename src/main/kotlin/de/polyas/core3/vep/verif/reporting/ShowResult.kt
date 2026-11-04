@@ -10,13 +10,9 @@
 
 package de.polyas.core3.vep.verif.reporting
 
-import de.polyas.core3.vep.verif.ballot.counting.CountingResult
 import de.polyas.core3.vep.verif.ballot.counting.Counting
-import de.polyas.core3.vep.verif.ballot.model.BallotId
-import de.polyas.core3.vep.verif.ballot.model.BallotSpec
-import de.polyas.core3.vep.verif.ballot.model.CandidateSpec
-import de.polyas.core3.vep.verif.ballot.model.Language
-import de.polyas.core3.vep.verif.ballot.model.OpenedVote
+import de.polyas.core3.vep.verif.ballot.counting.CountingResult
+import de.polyas.core3.vep.verif.ballot.model.*
 import de.polyas.core3.vep.verif.types.MessageWithProofPacket
 import de.polyas.core3.vep.verif.types.Registry
 
@@ -54,8 +50,7 @@ private fun Fmt.formatBallotResult(result: CountingResult, ballotSpec: BallotSpe
     +""
 
     framed("Ballot [${result.ballot}]: ${ballotSpec.title[lang]}") {
-        val res = result
-        +"Cast sheets: ${res.cast}, valid: ${res.valid}, malformed: ${res.malformed}, marked as abstention: ${res.abstained}, intentionally invalid: ${res.markedInvalid}, invalid: ${res.invalid}"
+        +"Cast sheets: ${result.cast}, valid: ${result.valid}, malformed: ${result.malformed}, marked as abstention: ${result.abstained}, intentionally invalid: ${result.markedInvalid}, invalid: ${result.invalid}"
 
         for (list in ballotSpec.lists) {
             val headers = list.columnHeaders.joinToString(separator = " | ") { it[lang] }

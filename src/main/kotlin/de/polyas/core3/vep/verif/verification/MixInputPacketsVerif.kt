@@ -12,7 +12,10 @@ package de.polyas.core3.vep.verif.verification
 
 import de.polyas.core3.crypto.elgamal.Ciphertext
 import de.polyas.core3.crypto.elgamal.instance.ECElement
-import de.polyas.core3.vep.verif.types.*
+import de.polyas.core3.vep.verif.types.AnnotatedBallot
+import de.polyas.core3.vep.verif.types.MixPacket
+import de.polyas.core3.vep.verif.types.Packet
+import de.polyas.core3.vep.verif.types.Registry
 
 /**
  * Verification of the board with input mix packets.
@@ -83,5 +86,4 @@ object MixInputPacketsVerif {
         registry.voters
             .map { it.publicLabel }
             .distinct()
-            .toList()
 }

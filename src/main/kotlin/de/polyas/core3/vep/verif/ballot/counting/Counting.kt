@@ -14,15 +14,9 @@ import de.polyas.core3.vep.verif.ballot.decoding.BallotDecoder
 import de.polyas.core3.vep.verif.ballot.decoding.DecodedBallot
 import de.polyas.core3.vep.verif.ballot.model.BallotId
 import de.polyas.core3.vep.verif.ballot.model.BallotSpec
-import de.polyas.core3.vep.verif.ballot.model.isWriteIn
 import de.polyas.core3.vep.verif.ballot.model.OpenedVote
-import de.polyas.core3.vep.verif.ballot.validation.BallotValidator
-import de.polyas.core3.vep.verif.ballot.validation.Validated
-import de.polyas.core3.vep.verif.ballot.validation.asMalformed
-import de.polyas.core3.vep.verif.ballot.validation.asValid
-import de.polyas.core3.vep.verif.ballot.validation.furtherValidate
-import kotlin.collections.component1
-import kotlin.collections.component2
+import de.polyas.core3.vep.verif.ballot.model.isWriteIn
+import de.polyas.core3.vep.verif.ballot.validation.*
 
 /**
  * Counting of the election result given as a sequence of open ballots or decoded ballots.

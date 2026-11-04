@@ -176,10 +176,10 @@ class BallotFlaggedVerif(
         votersWhoVoted: Set<String>
     ): ExpectedAnnotation {
         val voterId = ballotEntry.ballot.reference
-        if (voterId in votersWhoVoted) {
-            return ExpectedAnnotation.Incorrect("Duplicated ballot of voter $voterId")
+        return if (voterId in votersWhoVoted) {
+            ExpectedAnnotation.Incorrect("Duplicated ballot of voter $voterId")
         } else {
-            return ExpectedAnnotation.OK
+            ExpectedAnnotation.OK
         }
     }
 
@@ -224,6 +224,3 @@ private fun ExpectedAnnotation.and(other: () -> ExpectedAnnotation): ExpectedAnn
         ExpectedAnnotation.OK -> other()
         else -> this
     }
-
-
-

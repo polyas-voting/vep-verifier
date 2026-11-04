@@ -23,12 +23,12 @@ import java.io.File
 import java.nio.file.Paths
 
 /**
- * A utility for reading elements from json files representing content of bulletin boards
+ * A utility for reading elements from JSON files representing content of bulletin boards
  */
 internal class JsonFileReader(private val baseDirectory: File) {
 
     /**
-     * Returns a sequence of elements read from the json file representing the content of a bulletin board.
+     * Returns a sequence of elements read from the JSON file representing the content of a bulletin board.
      */
     inline fun<reified T> sequence(filename: String): Sequence<T> {
         val file = Paths.get(baseDirectory.absolutePath, filename).toFile()
@@ -36,7 +36,7 @@ internal class JsonFileReader(private val baseDirectory: File) {
     }
 
     /**
-     * Returns a sequence of elements read the json file representing the content of a bulletin board,
+     * Returns a sequence of elements read the JSON file representing the content of a bulletin board,
      * of `null` is the file does not exist.
      */
     inline fun<reified T> sequenceOrNull(filename: String): Sequence<T>? =
@@ -44,7 +44,7 @@ internal class JsonFileReader(private val baseDirectory: File) {
         else null
 
     /**
-     * Returns the only element read from the json file representing the content of a bulletin board.
+     * Returns the only element read from the JSON file representing the content of a bulletin board.
      * Throws there is no or more than one element in this file.
      */
     inline fun <reified T> singleton(filename: String): T {
@@ -112,4 +112,3 @@ private class ImportRecord {
         override fun toString(): String = "{$n, $p, $c}"
     }
 }
-
